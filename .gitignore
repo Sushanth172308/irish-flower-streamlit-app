@@ -109,7 +109,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
-movie_recommend_env/
+irish_env/
 
 # Spyder project settings
 .spyderproject
@@ -128,17 +128,3 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
-
-# if using pycharm
-.idea
-
-# if using VScode
-.vscode
-
-# add secret keys or API keys here
-configs/secrets.yaml
-
-# add your env folder here if its there
-
-
-

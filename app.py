@@ -1,64 +1,146 @@
-'''
-Author: sushanth
-Email: sushanth172308@gmail.com
-Date: 2022-Apr-04
-'''
+# -*- coding: utf-8 -*-
+"""
+Created on  Jan 18 11:09:55 2023
 
-import pickle
+@author: Sushanth
+"""
+
 import streamlit as st
-import requests
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.svm import SVC
+from sklearn.metrics import accuracy_score,plot_confusion_matrix
+st.markdown('<style>body{background-color: Blue;}</style>',unsafe_allow_html=True)
 
-def fetch_poster(movie_id):
-    url = "https://api.themoviedb.org/3/movie/{}?api_key=8265bd1679663a7ea12ac168da84d2e8&language=en-US".format(movie_id)
-    data = requests.get(url)
-    data = data.json()
-    poster_path = data['poster_path']
-    full_path = "https://image.tmdb.org/t/p/w500/" + poster_path
-    return full_path
-
-def recommend(movie):
-    index = movies[movies['title'] == movie].index[0]
-    distances = sorted(list(enumerate(similarity[index])), reverse=True, key=lambda x: x[1])
-    recommended_movie_names = []
-    recommended_movie_posters = []
-    for i in distances[1:6]:
-        # fetch the movie poster
-        movie_id = movies.iloc[i[0]].movie_id
-        recommended_movie_posters.append(fetch_poster(movie_id))
-        recommended_movie_names.append(movies.iloc[i[0]].title)
-
-    return recommended_movie_names,recommended_movie_posters
-
-
-st.header('Movie Recommendation System Using Machine Learning')
-movies = pickle.load(open('artifacts/movie_list.pkl','rb'))
-similarity = pickle.load(open('artifacts/similarity.pkl','rb'))
-
-movie_list = movies['title'].values
-selected_movie = st.selectbox(
-    "Type or select a movie from the dropdown",
-    movie_list
-)
-
-if st.button('Show Recommendation'):
-    recommended_movie_names,recommended_movie_posters = recommend(selected_movie)
-    col1, col2, col3, col4, col5= st.columns(5)
-    with col1:
-        st.text(recommended_movie_names[0])
-        st.image(recommended_movie_posters[0])
-    with col2:
-        st.text(recommended_movie_names[1])
-        st.image(recommended_movie_posters[1])
-
-    with col3:
-        st.text(recommended_movie_names[2])
-        st.image(recommended_movie_posters[2])
-    with col4:
-        st.text(recommended_movie_names[3])
-        st.image(recommended_movie_posters[3])
-    with col5:
-        st.text(recommended_movie_names[4])
-        st.image(recommended_movie_posters[4])
-
-
-
+def main():
+    
+    st.set_option('deprecation.showPyplotGlobalUse', False)
+    st.title('Iris Flower Species Classifier')
+    st.sidebar.title(' Select Option(s)')
+    st.markdown('Which species are you?🌸')
+    
+    @st.cache
+    def load_data():
+        data = pd.read_csv('Iris.csv')
+        return data.drop('Id',axis=1)
+        return data
+    
+    @st.cache
+    def split(df):
+        x = df.drop('Species',axis=1)
+        y = pd.factorize(df.Species)[0]
+        x_train,x_test,y_train,y_test = train_test_split(x,y,test_size=0.25,random_state=42)
+        return x_train,x_test,y_train,y_test
+    
+    if st.sidebar.checkbox('show data',False):
+        st.write(load_data())
+        
+    model_run = False
+    
+    df = load_data()
+    x_train,x_test,y_train,y_test = split(df)
+    
+    st.sidebar.subheader('Choose Classifier')
+    classifier = st.sidebar.selectbox('Classifier',('RandomForest','LogisticRegression','SVM','MultinomialNB','DecisionTree'))
+    
+    if classifier == 'RandomForest':
+        n_estimators = st.sidebar.number_input('Estimator',10,100,step=10,key='Estimator')
+        
+        if st.sidebar.checkbox('Classify',key='Classify'):
+            st.subheader('Random Forest Classifier')
+            model = RandomForestClassifier(n_estimators=n_estimators)
+            model.fit(x_train,y_train)
+            predict = model.predict(x_test)
+            accuracy = accuracy_score(y_test,predict)
+            st.write('Accuracy',accuracy)
+            st.subheader('Confusion Matrix')
+            plot_confusion_matrix(model,x_test,y_test,display_labels=['Setosa','Versicolor','Virginica'])
+            st.pyplot()
+            model_run = True
+            
+    if  classifier == 'LogisticRegression':
+        if st.sidebar.checkbox('Classify',key='Classify'):
+            st.subheader('Logistic Regression')
+            model = LogisticRegression()
+            model.fit(x_train,y_train)
+            predict = model.predict(x_test)
+            accuracy = accuracy_score(y_test,predict)
+            st.write('Accuracy',accuracy)
+            st.subheader('Confusion Matrix')
+            plot_confusion_matrix(model,x_test,y_test,display_labels=['Setosa','Versicolor','Virginica'])
+            st.pyplot()
+            model_run = True
+            
+    if  classifier == 'SVM':
+        if st.sidebar.checkbox('Classify',key='Classify'):
+            st.subheader('SVM')
+            model = SVC()
+            model.fit(x_train,y_train)
+            predict = model.predict(x_test)
+            accuracy = accuracy_score(y_test,predict)
+            st.write('Accuracy',accuracy)
+            st.subheader('Confusion Matrix')
+            plot_confusion_matrix(model,x_test,y_test,display_labels=['Setosa','Versicolor','Virginica'])
+            st.pyplot() 
+            model_run = True
+            
+     
+    if  classifier == 'MultinomialNB':
+        if st.sidebar.checkbox('Classify',key='Classify'):
+            st.subheader('MultinomialNB')
+            model = MultinomialNB()
+            model.fit(x_train,y_train)
+            predict = model.predict(x_test)
+            accuracy = accuracy_score(y_test,predict)
+            st.write('Accuracy',accuracy)
+            st.subheader('Confusion Matrix')
+            plot_confusion_matrix(model,x_test,y_test,display_labels=['Setosa','Versicolor','Virginica'])
+            st.pyplot() 
+            model_run = True
+            
+    if  classifier == 'DecisionTree':
+        if st.sidebar.checkbox('Classify',key='Classify'):
+            st.subheader('Decision Tree Classifier')
+            model = DecisionTreeClassifier()
+            model.fit(x_train,y_train)
+            predict = model.predict(x_test)
+            accuracy = accuracy_score(y_test,predict)
+            st.write('Accuracy',accuracy)
+            st.subheader('Confusion Matrix')
+            plot_confusion_matrix(model,x_test,y_test,display_labels=['Setosa','Versicolor','Virginica'])
+            st.pyplot()   
+        
+            model_run = True
+            
+    if model_run == True:
+        st.subheader('Predict')
+        pl = st.number_input('Petal_Length')
+        pw = st.number_input('Petal_Width')
+        sl = st.number_input('Sepal_Length')
+        sw = st.number_input('Sepal_Width')
+        if st.button('Predict'):
+            species = model.predict([[pl,pw,sl,sw]])
+            
+            if species == 0:
+                    species = 'Iris-Setosa'
+                    st.success('The species of iris is {}'.format(species))
+            elif species == 1:
+                    species = 'Iris-Versicolor'
+                    st.success('The species of iris is {}'.format(species))
+            elif species == 2:
+                species = 'Iris-Virginica'
+                st.success('The species of iris is {}'.format(species))
+        
+        
+    
+if __name__ == '__main__':
+    main()
