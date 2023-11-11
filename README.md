@@ -9,9 +9,9 @@ End to end machine learning project with Docker Github actions and deployment
 '''
 #  useful Docker commands 
 '''
-- docker build -f Dockerfile -t <docker_image_name> .
+- .docker build -f Dockerfile -t <docker_image_name> .
 
-- docker images
+- .docker images
 
 - docker run -p 8080:8080 <docker_image_name>
 - docker run -d -p 8080:8080 <docker_image_name> 
