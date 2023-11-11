@@ -7,7 +7,7 @@ Creating a new environment
 conda create -p env python==3.7 -y
 
 '''
-# Docker commands 
+#  useful Docker commands 
 '''
 docker build -f Dockerfile -t <docker_image_name> .
 
